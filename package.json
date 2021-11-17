@@ -1,0 +1,28 @@
+{
+  "name": "blockchain-developer-bootcamp-final-project",
+  "version": "1.0.0",
+  "description": "## Description:",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jredondoh/blockchain-developer-bootcamp-final-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jredondoh/blockchain-developer-bootcamp-final-project/issues"
+  },
+  "homepage": "https://github.com/jredondoh/blockchain-developer-bootcamp-final-project#readme",
+  "dependencies": {
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/contracts": "^4.3.3",
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0"
+  }
+}
