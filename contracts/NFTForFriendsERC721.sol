@@ -6,12 +6,12 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract MyTokenERC721 is ERC721, Pausable, Ownable {
+contract NFF is ERC721, Pausable, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721("MyToken", "MTK") {}
+    constructor() ERC721("NFTForFriends", "NFF") {}
 
     function pause() public onlyOwner {
         _pause();
