@@ -1,204 +1,138 @@
 let BN = web3.utils.BN;
-let SupplyChain = artifacts.require("SupplyChain");
+let NFTsForFriends = artifacts.require("NFTsForFriends");
+let NFF = artifacts.require("NFF");
 let { catchRevert } = require("./exceptionsHelpers.js");
 const { items: ItemStruct, isDefined, isPayable, isType } = require("./ast-helper");
 
-contract("SupplyChain", function (accounts) {
+contract("NFTsForFriends", function (accounts) {
   const [_owner, alice, bob] = accounts;
   const emptyAddress = "0x0000000000000000000000000000000000000000";
 
   const price = "1000";
   const excessAmount = "2000";
-  const name = "book";
+  const NFTHash = "0x12345678";
 
   let instance;
 
   beforeEach(async () => {
-    instance = await SupplyChain.new();
+    instance = await NFTsForFriends.new({from: _owner});
   });
 
   describe("Variables", () => {
     it("should have an owner", async () => {
-      assert.equal(typeof instance.owner, 'function', "the contract has no owner");
-    });
-
-    it("should have an skuCount", async () => {
-      assert.equal(typeof instance.skuCount, 'function', "the contract has no skuCount");
-    });
-
-    describe("enum State", () => {
-      let enumState;
-      before(() => {
-        enumState = SupplyChain.enums.State;
-        assert(
-          enumState,
-          "The contract should define an Enum called State"
-        );
-      });
-
-      it("should define `ForSale`", () => {
-        assert(
-          enumState.hasOwnProperty('ForSale'),
-          "The enum does not have a `ForSale` value"
-        );
-      });
-
-      it("should define `Sold`", () => {
-        assert(
-          enumState.hasOwnProperty('Sold'),
-          "The enum does not have a `Sold` value"
-        );
-      });
-
-      it("should define `Shipped`", () => {
-        assert(
-          enumState.hasOwnProperty('Shipped'),
-          "The enum does not have a `Shipped` value"
-        );
-      });
-
-      it("should define `Received`", () => {
-        assert(
-          enumState.hasOwnProperty('Received'),
-          "The enum does not have a `Received` value"
-        );
-      });
-    })
-
-    describe("Item struct", () => {
-      let subjectStruct;
-
-      before(() => {
-        subjectStruct = ItemStruct(SupplyChain);
-        assert(
-          subjectStruct !== null, 
-          "The contract should define an `Item Struct`"
-        );
-      });
-
-      it("should have a `name`", () => {
-        assert(
-          isDefined(subjectStruct)("name"), 
-          "Struct Item should have a `name` member"
-        );
-        assert(
-          isType(subjectStruct)("name")("string"), 
-          "`name` should be of type `string`"
-        );
-      });
-
-      it("should have a `sku`", () => {
-        assert(
-          isDefined(subjectStruct)("sku"), 
-          "Struct Item should have a `sku` member"
-        );
-        assert(
-          isType(subjectStruct)("sku")("uint"), 
-          "`sku` should be of type `uint`"
-        );
-      });
-
-      it("should have a `price`", () => {
-        assert(
-          isDefined(subjectStruct)("price"), 
-          "Struct Item should have a `price` member"
-        );
-        assert(
-          isType(subjectStruct)("price")("uint"), 
-          "`price` should be of type `uint`"
-        );
-      });
-
-      it("should have a `state`", () => {
-        assert(
-          isDefined(subjectStruct)("state"), 
-          "Struct Item should have a `state` member"
-        );
-        assert(
-          isType(subjectStruct)("state")("State"), 
-          "`state` should be of type `State`"
-        );
-      });
-
-      it("should have a `seller`", () => {
-        assert(
-          isDefined(subjectStruct)("seller"), 
-          "Struct Item should have a `seller` member"
-        );
-        assert(
-          isType(subjectStruct)("seller")("address"), 
-          "`seller` should be of type `address`"
-        );
-        assert(
-          isPayable(subjectStruct)("seller"), 
-          "`seller` should be payable"
-        );
-      });
-
-      it("should have a `buyer`", () => {
-        assert(
-          isDefined(subjectStruct)("buyer"), 
-          "Struct Item should have a `buyer` member"
-        );
-        assert(
-          isType(subjectStruct)("buyer")("address"), 
-          "`buyer` should be of type `address`"
-        );
-        assert(
-          isPayable(subjectStruct)("buyer"), 
-          "`buyer` should be payable"
-        );
-      });
+      const instanceOwner = await instance.owner.call();
+      assert.equal(instanceOwner, _owner, "the contract has no owner");
     });
   });
 
   describe("Use cases", () => {
-    it("should add an item with the provided name and price", async () => {
-      await instance.addItem(name, price, { from: alice });
-
-      const result = await instance.fetchItem.call(0);
-
-      assert.equal(
-        result[0],
-        name,
-        "the name of the last added item does not match the expected value",
-      );
-      assert.equal(
-        result[2].toString(10),
-        price,
-        "the price of the last added item does not match the expected value",
-      );
-      assert.equal(
-        result[3].toString(10),
-        SupplyChain.State.ForSale,
-        'the state of the item should be "For Sale"',
-      );
-      assert.equal(
-        result[4],
-        alice,
-        "the address adding the item should be listed as the seller",
-      );
-      assert.equal(
-        result[5],
-        emptyAddress,
-        "the buyer address should be set to 0 when an item is added",
-      );
-    });
-
-    it("should emit a LogForSale event when an item is added", async () => {
+    it("should  emit a LogAddressRegistered event when we register an user", async () => {
       let eventEmitted = false;
-      const tx = await instance.addItem(name, price, { from: alice });
+      const tx = await instance.registerIn({ from: alice });
 
-      if (tx.logs[0].event == "LogForSale") {
+      if (tx.logs[0].event == "LogAddressRegistered") {
         eventEmitted = true;
       }
 
       assert.equal(
         eventEmitted,
         true,
-        "adding an item should emit a For Sale event",
+        "registering an user should emit a AddressRegistered event",
       );
     });
+
+    it("should emit a LogNFTPublished event when an NFT is published", async () => {
+      let eventEmitted = false;
+      const tx = await instance.publishNFT(NFTHash, price, { from: _owner });
+
+      if (tx.logs[0].event == "LogNFTPublished") {
+        eventEmitted = true;
+      }
+
+      assert.equal(
+        eventEmitted,
+        true,
+        "publishing an NFT should emit a LogNFTPublished event",
+      );
+    });
+
+    it("should allow someone to publish a NFT and its owner must be coherent", async () => {
+      const NFTId = 0
+      await instance.publishNFT(NFTHash, price, { from: _owner });
+      const available = await instance.isNFTAvailable.call(NFTId);
+
+      assert.equal(
+        available,
+        true,
+        'the NFT should be available',
+      );
+
+      const contractOwnerNftOwner = await instance.amIOwnerOf.call(NFTId, { from: _owner });
+
+      assert.equal(
+        contractOwnerNftOwner,
+        true,
+        'the contract owner should be the NFT owner',
+      );
+
+      
+      const aliceNotNftOwner = await instance.amIOwnerOf.call(NFTId, { from: alice });
+
+      assert.equal(
+        aliceNotNftOwner,
+        false,
+        'alice should not be the NFT owner',
+      );
+
+      const actualNftOwner = await instance._nffERC721.ownerOf.call(NFTId);
+      console.log(actualNftOwner);
+/* 
+      assert.equal(
+        actualNftOwner,
+        _owner,
+        'the NFT ownership should be coherent',
+      ); */
+
+      /*
+      var aliceBalanceBefore = await web3.eth.getBalance(alice);
+      var bobBalanceBefore = await web3.eth.getBalance(bob);
+
+      await instance.buyItem(0, { from: bob, value: excessAmount });
+
+      var aliceBalanceAfter = await web3.eth.getBalance(alice);
+      var bobBalanceAfter = await web3.eth.getBalance(bob);
+
+      const result = await instance.fetchItem.call(0);
+
+      assert.equal(
+        result[3].toString(10),
+        SupplyChain.State.Sold,
+        'the state of the item should be "Sold"',
+      );
+
+      assert.equal(
+        result[5],
+        bob,
+        "the buyer address should be set bob when he purchases an item",
+      );
+
+      assert.equal(
+        new BN(aliceBalanceAfter).toString(),
+        new BN(aliceBalanceBefore).add(new BN(price)).toString(),
+        "alice's balance should be increased by the price of the item",
+      );
+
+      assert.isBelow(
+        Number(bobBalanceAfter),
+        Number(new BN(bobBalanceBefore).sub(new BN(price))),
+        "bob's balance should be reduced by more than the price of the item (including gas costs)",
+      );
+      */
+    });
+  });
+  /*
+
+    
 
     it("should allow someone to purchase an item and update state accordingly", async () => {
       await instance.addItem(name, price, { from: alice });
@@ -335,6 +269,6 @@ contract("SupplyChain", function (accounts) {
       );
     });
 
-  });
+ */
 
 });

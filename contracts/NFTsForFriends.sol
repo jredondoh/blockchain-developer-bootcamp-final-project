@@ -12,6 +12,18 @@ contract NFTsForFriends is Ownable{
     mapping (uint256 => uint256) private _NFTPrices;
     mapping (uint256 => mapping (address => uint256)) private _NFTShares;
 
+    /* 
+   * Events
+   */
+
+    event LogAddressRegistered(address _address);
+
+    event LogNFTPublished(uint256 _NFTId);
+
+    event LogNFTSolelyAcquired(uint256 _NFTId, address _buyer);
+
+    event LogNFTAcquired(uint256 _NFTId, uint256[] _propertyPoints, address[] _buyers);
+
     modifier isRegistered(address _address){
         // checks that the sender is registered
         require(_registeredAddresses[_address]);
@@ -40,15 +52,20 @@ contract NFTsForFriends is Ownable{
     function registerIn() public {
         // registers the sender in the marketplace
         _registeredAddresses[msg.sender] = true;
+        emit LogAddressRegistered(msg.sender);
     }
 
     function publishNFT(uint256 hashNFT, uint256 price)
         public
-        returns (uint256 _NFTId){
+        onlyOwner()
+        returns (uint256 _NFTId)
+    {
         // publishes the NFT in the marketplace
         uint256 NFTId = _nffERC721.safeMint(this.owner());
         _publishedNFTs[hashNFT] = NFTId;
         _NFTPrices[NFTId] = price;
+        emit LogNFTPublished(NFTId);
+         
         return NFTId;
     }
 
@@ -61,11 +78,20 @@ contract NFTsForFriends is Ownable{
         // acquires solely the NFT property
         _acquiredNFTs[_NFTId] = true;
         _nffERC721.safeTransferFrom(this.owner(), msg.sender, _NFTId);
+        emit LogNFTSolelyAcquired(_NFTId, msg.sender);
     }
 
     function isNFTAvailable(uint256 _NFTId) public view returns (bool){
         // returns if the NFT is available to acquire
-        return (_nffERC721.ownerOf(_NFTId)!=address(0) && _nffERC721.ownerOf(_NFTId)==this.owner());
+        return (_nffERC721.ownerOf(_NFTId)==this.owner());
+    }
+
+    function amIOwnerOf(uint256 _NFTId) public view returns (bool){
+        // returns if the message sender is owner of the NFT
+        if (_nffERC721.ownerOf(_NFTId)==msg.sender){
+            return true;
+        }
+        return (_NFTShares[_NFTId][msg.sender] > 0);
     }
 
     function acquireSharedNFT(
@@ -86,5 +112,6 @@ contract NFTsForFriends is Ownable{
         for(uint i = 0 ; i<_buyers.length; i++) {
             _NFTShares[_NFTId][_buyers[i]] = _propertyPoints[i];
         }
+        emit LogNFTAcquired(_NFTId, _propertyPoints, _buyers);
     }
 }
