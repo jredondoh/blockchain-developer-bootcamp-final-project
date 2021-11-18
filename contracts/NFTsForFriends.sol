@@ -47,7 +47,12 @@ contract NFTsForFriends is Ownable{
         _;
     }
 
-    constructor() Ownable () {}
+    constructor() Ownable () {
+    }
+
+    function setApproval() public onlyOwner(){
+        _nffERC721.setApprovalForAll(address(this), true);
+    }
 
     function registerIn() public {
         // registers the sender in the marketplace
@@ -84,6 +89,11 @@ contract NFTsForFriends is Ownable{
     function isNFTAvailable(uint256 _NFTId) public view returns (bool){
         // returns if the NFT is available to acquire
         return (_nffERC721.ownerOf(_NFTId)==this.owner());
+    }
+
+    function ownerOfERC721Token(uint256 _NFTId) public view returns (address){
+        // returns the owner of the ERC721 token associated with the NFT
+        return _nffERC721.ownerOf(_NFTId);
     }
 
     function amIOwnerOf(uint256 _NFTId) public view returns (bool){

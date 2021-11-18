@@ -84,50 +84,30 @@ contract("NFTsForFriends", function (accounts) {
         'alice should not be the NFT owner',
       );
 
-      const actualNftOwner = await instance._nffERC721.ownerOf.call(NFTId);
-      console.log(actualNftOwner);
-/* 
+      const actualNftOwner = await instance.ownerOfERC721Token.call(NFTId, { from: alice });
+
       assert.equal(
         actualNftOwner,
         _owner,
-        'the NFT ownership should be coherent',
-      ); */
+        'the owner of the NFT ERC 721 token should be coherent',
+      );
+    });
 
-      /*
-      var aliceBalanceBefore = await web3.eth.getBalance(alice);
-      var bobBalanceBefore = await web3.eth.getBalance(bob);
+    it("should allow someone to acquire a published NFT and its owner must be coherent", async () => {
+      const NFTId = 0
+      await instance.setApproval({ from: _owner });
+      await instance.publishNFT(NFTHash, price, { from: _owner });
+      await instance.registerIn({ from: alice });
+      await instance.acquireNFT(NFTId,{ from: alice, value: excessAmount })
 
-      await instance.buyItem(0, { from: bob, value: excessAmount });
-
-      var aliceBalanceAfter = await web3.eth.getBalance(alice);
-      var bobBalanceAfter = await web3.eth.getBalance(bob);
-
-      const result = await instance.fetchItem.call(0);
+      const aliceNftOwner = await instance.amIOwnerOf.call(NFTId, { from: alice });
 
       assert.equal(
-        result[3].toString(10),
-        SupplyChain.State.Sold,
-        'the state of the item should be "Sold"',
+        aliceNftOwner,
+        true,
+        'alice should not be the NFT owner',
       );
 
-      assert.equal(
-        result[5],
-        bob,
-        "the buyer address should be set bob when he purchases an item",
-      );
-
-      assert.equal(
-        new BN(aliceBalanceAfter).toString(),
-        new BN(aliceBalanceBefore).add(new BN(price)).toString(),
-        "alice's balance should be increased by the price of the item",
-      );
-
-      assert.isBelow(
-        Number(bobBalanceAfter),
-        Number(new BN(bobBalanceBefore).sub(new BN(price))),
-        "bob's balance should be reduced by more than the price of the item (including gas costs)",
-      );
-      */
     });
   });
   /*
@@ -145,7 +125,7 @@ contract("NFTsForFriends", function (accounts) {
       var bobBalanceAfter = await web3.eth.getBalance(bob);
 
       const result = await instance.fetchItem.call(0);
-
+-
       assert.equal(
         result[3].toString(10),
         SupplyChain.State.Sold,
