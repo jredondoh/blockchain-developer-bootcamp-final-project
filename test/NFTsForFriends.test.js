@@ -29,7 +29,7 @@ contract("NFTsForFriends", function (accounts) {
   });
 
   describe("Use cases", () => {
-    it("should  emit a LogAddressRegistered event when we register an user", async () => {
+    it("should emit a LogAddressRegistered event when we register an user", async () => {
       let eventEmitted = false;
       const tx = await instance.registerIn({ from: alice });
 
@@ -101,7 +101,6 @@ contract("NFTsForFriends", function (accounts) {
       await instance.publishNFT(NFTHash, price, { from: _owner });
       await instance.registerIn({ from: alice });
       await instance.acquireNFT(NFTId, { from: alice, value: excessAmount })
-      await instance.transferNFT(NFTId, alice, { from: _owner})
 
       const aliceNftOwner = await instance.amIOwnerOf.call(NFTId, { from: alice });
 
@@ -109,6 +108,46 @@ contract("NFTsForFriends", function (accounts) {
         aliceNftOwner,
         true,
         'alice should be the NFT owner',
+      );
+
+      const actualNftOwner = await instanceNFF.ownerOf.call(NFTId);
+
+      assert.equal(
+        actualNftOwner,
+        alice,
+        'the owner of the NFT ERC 721 token should be coherent',
+      );
+
+    });
+
+    it("should allow someone to acquire a published NFT for them and their friends, and its owner must be coherent", async () => {
+      const NFTId = 0
+      await instance.publishNFT(NFTHash, price, { from: _owner });
+      await instance.registerIn({ from: alice });
+      await instance.acquireSharedNFT(NFTId, [1, 1], [alice, bob], { from: alice, value: excessAmount })
+
+      const aliceNftOwner = await instance.amIOwnerOf.call(NFTId, { from: alice });
+
+      assert.equal(
+        aliceNftOwner,
+        true,
+        'alice should be the NFT owner',
+      );
+
+      const bobNftOwner = await instance.amIOwnerOf.call(NFTId, { from: bob });
+
+      assert.equal(
+        bobNftOwner,
+        true,
+        'bob should be the NFT owner',
+      );
+
+      const actualNftOwner = await instanceNFF.ownerOf.call(NFTId);
+
+      assert.equal(
+        actualNftOwner,
+        _owner,
+        'the owner of the NFT ERC 721 token should still be the contract owner',
       );
 
     });
