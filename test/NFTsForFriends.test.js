@@ -15,7 +15,10 @@ contract("NFTsForFriends", function (accounts) {
   let instance;
 
   beforeEach(async () => {
-    instance = await NFTsForFriends.new({from: _owner});
+    instanceNFF = await NFF.new({from: _owner});
+    instance = await NFTsForFriends.new(instanceNFF.address, {from: _owner});
+    await instanceNFF.setApprovalForAll(instance.address,true, {from: _owner});
+    await instanceNFF.transferOwnership(instance.address, {from: _owner});
   });
 
   describe("Variables", () => {
@@ -84,7 +87,7 @@ contract("NFTsForFriends", function (accounts) {
         'alice should not be the NFT owner',
       );
 
-      const actualNftOwner = await instance.ownerOfERC721Token.call(NFTId, { from: alice });
+      const actualNftOwner = await instanceNFF.ownerOf.call(NFTId, { from: alice });
 
       assert.equal(
         actualNftOwner,
@@ -95,17 +98,17 @@ contract("NFTsForFriends", function (accounts) {
 
     it("should allow someone to acquire a published NFT and its owner must be coherent", async () => {
       const NFTId = 0
-      await instance.setApproval({ from: _owner });
       await instance.publishNFT(NFTHash, price, { from: _owner });
       await instance.registerIn({ from: alice });
-      await instance.acquireNFT(NFTId,{ from: alice, value: excessAmount })
+      await instance.acquireNFT(NFTId, { from: alice, value: excessAmount })
+      await instance.transferNFT(NFTId, alice, { from: _owner})
 
       const aliceNftOwner = await instance.amIOwnerOf.call(NFTId, { from: alice });
 
       assert.equal(
         aliceNftOwner,
         true,
-        'alice should not be the NFT owner',
+        'alice should be the NFT owner',
       );
 
     });

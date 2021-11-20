@@ -4,12 +4,13 @@ import "./NFTForFriendsERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTsForFriends is Ownable{
-    NFF public _nffERC721 = new NFF();
+    NFF private _nffERC721;
 
     mapping (address => bool) private _registeredAddresses;
     mapping (uint256 => bool) private _acquiredNFTs;
     mapping (uint256 => uint256) private _publishedNFTs;
     mapping (uint256 => uint256) private _NFTPrices;
+    mapping (uint256 => address) private _NFTOwners;
     mapping (uint256 => mapping (address => uint256)) private _NFTShares;
 
     /* 
@@ -19,6 +20,8 @@ contract NFTsForFriends is Ownable{
     event LogAddressRegistered(address _address);
 
     event LogNFTPublished(uint256 _NFTId);
+
+    event LogNFTPreAcquired(uint256 _NFTId, address _buyer);
 
     event LogNFTSolelyAcquired(uint256 _NFTId, address _buyer);
 
@@ -42,16 +45,18 @@ contract NFTsForFriends is Ownable{
         _;
     }
 
+    modifier hasNFTBeenPreAcquired(uint256 _NFTId, address _buyer){
+    // checks that the NFT has not been acquired yet
+        require(_NFTOwners[_NFTId]==_buyer);
+        _;
+    }
     modifier paidEnough(uint _price) { 
         require(msg.value >= _price); 
         _;
     }
 
-    constructor() Ownable () {
-    }
-
-    function setApproval() public onlyOwner(){
-        _nffERC721.setApprovalForAll(address(this), true);
+    constructor(address _nffAddress) Ownable () {
+        _nffERC721 = NFF(_nffAddress);
     }
 
     function registerIn() public {
@@ -80,10 +85,21 @@ contract NFTsForFriends is Ownable{
         hasNFTNotYetBeenAcquired(_NFTId)
         paidEnough(_NFTPrices[_NFTId])
     {
+        // step previous to acquiring solely the NFT property
+        _NFTOwners[_NFTId] = msg.sender;
+        emit LogNFTPreAcquired(_NFTId, msg.sender);
+    }
+
+    function transferNFT(uint256 _NFTId, address _buyer) public   
+        onlyOwner()
+        isNFTPublished(_NFTId)
+        hasNFTNotYetBeenAcquired(_NFTId)
+        hasNFTBeenPreAcquired(_NFTId, _buyer)
+    {
         // acquires solely the NFT property
         _acquiredNFTs[_NFTId] = true;
-        _nffERC721.safeTransferFrom(this.owner(), msg.sender, _NFTId);
-        emit LogNFTSolelyAcquired(_NFTId, msg.sender);
+        _nffERC721.transferFrom(this.owner(), _buyer, _NFTId);
+        emit LogNFTSolelyAcquired(_NFTId, _buyer);
     }
 
     function isNFTAvailable(uint256 _NFTId) public view returns (bool){
