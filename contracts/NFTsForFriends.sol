@@ -18,10 +18,6 @@ contract NFTsForFriends is Ownable, Pausable{
     mapping (uint256 => uint256) private _NFTPrices;
     mapping (uint256 => mapping (address => uint256)) private _NFTShares;
 
-    /* 
-   * Events
-   */
-
     /// @param _address Address registered in the contract.
     event LogAddressRegistered(address _address);
 
@@ -60,6 +56,7 @@ contract NFTsForFriends is Ownable, Pausable{
         _;
     }
 
+    /// @param _nffAddress ERC721 contract address.
     constructor(address _nffAddress) 
         Ownable () 
         Pausable ()
