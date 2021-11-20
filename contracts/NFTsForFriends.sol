@@ -1,9 +1,14 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
 import "./NFTForFriendsERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
+/// @title NFTs for friends
+/// @author Jose Redondo
+/// @dev All function calls are currently implemented without side effects
+/// @custom:experimental This is an experimental contract.
 contract NFTsForFriends is Ownable, Pausable{
     NFF private _nffERC721;
 
@@ -17,12 +22,19 @@ contract NFTsForFriends is Ownable, Pausable{
    * Events
    */
 
+    /// @param _address Address registered in the contract.
     event LogAddressRegistered(address _address);
 
+    /// @param _NFTId Identifier of the published NFT.
     event LogNFTPublished(uint256 _NFTId);
 
+    /// @param _NFTId Identifier of the acquired NFT.
+    /// @param _buyer Address of the NFT buyer.
     event LogNFTSolelyAcquired(uint256 _NFTId, address _buyer);
 
+    /// @param _NFTId Identifier of the acquired NFT.
+    /// @param _propertyPoints Property shares for any of the NFT buyers.
+    /// @param _buyers Addresses of the NFT buyers.
     event LogNFTAcquired(uint256 _NFTId, uint256[] _propertyPoints, address[] _buyers);
 
     modifier isRegistered(address _address){
@@ -55,38 +67,43 @@ contract NFTsForFriends is Ownable, Pausable{
         _nffERC721 = NFF(_nffAddress);
     }
 
+    /// @notice Pause the contract. Only the contract owner can call it.
     function pause() public onlyOwner {
         _pause();
     }
 
+    /// @notice Unpause the contract. Only the contract owner can call it.
     function unpause() public onlyOwner {
         _unpause();
     }
 
-
-
+    /// @notice Registers the caller in the contract.
     function registerIn() public 
         whenNotPaused 
     {
-        // registers the sender in the marketplace
         _registeredAddresses[msg.sender] = true;
         emit LogAddressRegistered(msg.sender);
     }
 
-    function publishNFT(uint256 hashNFT, uint256 price)
+    /// @notice Publishes an NFT, minting an ERC721 token and associating it with the NFT hash. Only the contract owner can call it.
+    /// @param _hashNFT NFT hash value.
+    /// @param _price NFT price.
+    /// @return NFT identifier.
+    function publishNFT(uint256 _hashNFT, uint256 _price)
         public
         onlyOwner()
-        returns (uint256 _NFTId)
+        returns (uint256)
     {
-        // publishes the NFT in the marketplace
         uint256 NFTId = _nffERC721.safeMint(this.owner());
-        _publishedNFTs[hashNFT] = NFTId;
-        _NFTPrices[NFTId] = price;
+        _publishedNFTs[_hashNFT] = NFTId;
+        _NFTPrices[NFTId] = _price;
         emit LogNFTPublished(NFTId);
          
         return NFTId;
     }
 
+    /// @notice Transfers the NFT to the caller if the message value is superior or equal to the NFT price.
+    /// @param _NFTId Identifier of the NFT to acquire.
     function acquireNFT(uint256 _NFTId) public payable 
         whenNotPaused
         isRegistered(msg.sender)
@@ -94,25 +111,32 @@ contract NFTsForFriends is Ownable, Pausable{
         hasNFTNotYetBeenAcquired(_NFTId)
         paidEnough(_NFTPrices[_NFTId])
     {
-        // acquires solely the NFT property
         _acquiredNFTs[_NFTId] = true;
         _nffERC721.transferFrom(this.owner(), msg.sender, _NFTId);
         emit LogNFTSolelyAcquired(_NFTId, msg.sender);
     }
 
+    /// @notice Returns if the NFT is still available to acquire.
+    /// @param _NFTId Identifier of the NFT.
+    /// @return If the NFT is still available to acquire.
     function isNFTAvailable(uint256 _NFTId) public view returns (bool){
-        // returns if the NFT is available to acquire
-        return (_nffERC721.ownerOf(_NFTId)==this.owner());
+        return ((!_acquiredNFTs[_NFTId])&&(_nffERC721.ownerOf(_NFTId)==this.owner()));
     }
 
+    /// @notice Returns if the caller is the NFT owner.
+    /// @param _NFTId Identifier of the NFT.
+    /// @return If the NFT is owned by the caller.
     function amIOwnerOf(uint256 _NFTId) public view returns (bool){
-        // returns if the message sender is owner of the NFT
         if (_nffERC721.ownerOf(_NFTId)==msg.sender){
             return true;
         }
         return (_NFTShares[_NFTId][msg.sender] > 0);
     }
 
+    /// @notice Transfers the NFT ownership to several buyers according to the property points sent as parameter.
+    /// @param _NFTId Identifier of the NFT to acquire.
+    /// @param _propertyPoints Property shares of the several buyers.
+    /// @param _buyers Buyers to share the NFT ownership.
     function acquireSharedNFT(
         uint256 _NFTId,
         uint256[] memory _propertyPoints,
