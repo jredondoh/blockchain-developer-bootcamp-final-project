@@ -151,6 +151,11 @@ contract("NFTsForFriends", function (accounts) {
       );
 
     });
+    it("should allow someone to acquire a published NFT for them and their friends, and its owner must be coherent", async () => {
+      await instance.pause({ from: _owner})
+      const tx = await instance.registerIn({ from: alice });
+      console.log(tx);
+    });
   });
   /*
 

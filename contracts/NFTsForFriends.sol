@@ -2,8 +2,9 @@ pragma solidity 0.8.2;
 
 import "./NFTForFriendsERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
-contract NFTsForFriends is Ownable{
+contract NFTsForFriends is Ownable, Pausable{
     NFF private _nffERC721;
 
     mapping (address => bool) private _registeredAddresses;
@@ -47,11 +48,26 @@ contract NFTsForFriends is Ownable{
         _;
     }
 
-    constructor(address _nffAddress) Ownable () {
+    constructor(address _nffAddress) 
+        Ownable () 
+        Pausable ()
+    {
         _nffERC721 = NFF(_nffAddress);
     }
 
-    function registerIn() public {
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+
+
+    function registerIn() public 
+        whenNotPaused 
+    {
         // registers the sender in the marketplace
         _registeredAddresses[msg.sender] = true;
         emit LogAddressRegistered(msg.sender);
@@ -72,6 +88,7 @@ contract NFTsForFriends is Ownable{
     }
 
     function acquireNFT(uint256 _NFTId) public payable 
+        whenNotPaused
         isRegistered(msg.sender)
         isNFTPublished(_NFTId)
         hasNFTNotYetBeenAcquired(_NFTId)
@@ -101,6 +118,7 @@ contract NFTsForFriends is Ownable{
         uint256[] memory _propertyPoints,
         address[] memory _buyers
     ) public payable 
+        whenNotPaused
         isRegistered(msg.sender)
         isNFTPublished(_NFTId)
         hasNFTNotYetBeenAcquired(_NFTId)
@@ -115,5 +133,11 @@ contract NFTsForFriends is Ownable{
             _NFTShares[_NFTId][_buyers[i]] = _propertyPoints[i];
         }
         emit LogNFTAcquired(_NFTId, _propertyPoints, _buyers);
+    }
+
+    receive() external payable {}
+
+    fallback() external payable {
+        revert();
     }
 }
