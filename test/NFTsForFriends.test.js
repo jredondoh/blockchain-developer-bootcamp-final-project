@@ -60,7 +60,7 @@ contract("NFTsForFriends", function (accounts) {
     });
 
     it("should allow someone to publish a NFT and its owner must be coherent", async () => {
-      const NFTId = 0
+      const NFTId = 1
       await instance.publishNFT(NFTHash, price, { from: _owner });
       const available = await instance.isNFTAvailable.call(NFTId);
 
@@ -97,7 +97,7 @@ contract("NFTsForFriends", function (accounts) {
     });
 
     it("should allow someone to acquire a published NFT and its owner must be coherent", async () => {
-      const NFTId = 0
+      const NFTId = 1
       await instance.publishNFT(NFTHash, price, { from: _owner });
       await instance.registerIn({ from: alice });
       await instance.acquireNFT(NFTId, { from: alice, value: excessAmount })
@@ -121,7 +121,7 @@ contract("NFTsForFriends", function (accounts) {
     });
 
     it("should allow someone to acquire a published NFT for them and their friends, and its owner must be coherent", async () => {
-      const NFTId = 0
+      const NFTId = 1
       await instance.publishNFT(NFTHash, price, { from: _owner });
       await instance.registerIn({ from: alice });
       await instance.acquireSharedNFT(NFTId, [1, 1], [alice, bob], { from: alice, value: excessAmount })

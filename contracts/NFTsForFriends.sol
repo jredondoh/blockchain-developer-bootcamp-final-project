@@ -33,19 +33,25 @@ contract NFTsForFriends is Ownable, Pausable{
     /// @param _buyers Addresses of the NFT buyers.
     event LogNFTAcquired(uint256 _NFTId, uint256[] _propertyPoints, address[] _buyers);
 
-    modifier isRegistered(address _address){
+    modifier addressRegistered(address _address){
         // checks that the sender is registered
         require(_registeredAddresses[_address]);
         _;
     }
 
-    modifier isNFTPublished(uint256 _NFTId){
+    modifier NFTNotAlreadyPublished(uint256 _hashNFT){
+        // checks that the NFT has not already been published
+        // This check needs the ERC721 to start issuing token id in 1 instead of 0
+        require(_publishedNFTs[_hashNFT]==0);
+        _;
+    }
+    modifier NFTPublished(uint256 _NFTId){
         // checks that the NFT is published
         require(_nffERC721.ownerOf(_NFTId)!=address(0));
         _;
     }
 
-    modifier hasNFTNotYetBeenAcquired(uint256 _NFTId){
+    modifier NFTNotYetBeenAcquired(uint256 _NFTId){
         // checks that the NFT has not been acquired yet
         require(!_acquiredNFTs[_NFTId]);
         _;
@@ -82,6 +88,13 @@ contract NFTsForFriends is Ownable, Pausable{
         emit LogAddressRegistered(msg.sender);
     }
 
+    /// @notice Returns if an address is registered in the contract.
+    /// @param _address Address to check if registered.
+    /// @return If _address is registered in the contract.
+    function isAddressRegistered(address _address) public view returns (bool){
+        return _registeredAddresses[_address];
+    }
+
     /// @notice Publishes an NFT, minting an ERC721 token and associating it with the NFT hash. Only the contract owner can call it.
     /// @param _hashNFT NFT hash value.
     /// @param _price NFT price.
@@ -89,6 +102,7 @@ contract NFTsForFriends is Ownable, Pausable{
     function publishNFT(uint256 _hashNFT, uint256 _price)
         public
         onlyOwner()
+        NFTNotAlreadyPublished(_hashNFT)
         returns (uint256)
     {
         uint256 NFTId = _nffERC721.safeMint(this.owner());
@@ -99,13 +113,33 @@ contract NFTsForFriends is Ownable, Pausable{
         return NFTId;
     }
 
+    /// @notice Returns the identifier of the NFT with the hash provided.
+    /// @param _hashNFT NFT hash value.
+    /// @return NFT identifier.
+    function getNFTId(uint256 _hashNFT)
+        public view
+        returns (uint256)
+    {
+        return _publishedNFTs[_hashNFT];
+    }
+
+    /// @notice Returns the price of the NFT with the hash provided.
+    /// @param _hashNFT NFT hash value.
+    /// @return NFT price.
+    function getNFTPrice(uint256 _hashNFT)
+        public view
+        returns (uint256)
+    {
+        return _NFTPrices[_publishedNFTs[_hashNFT]];
+    }
+
     /// @notice Transfers the NFT to the caller if the message value is superior or equal to the NFT price.
     /// @param _NFTId Identifier of the NFT to acquire.
     function acquireNFT(uint256 _NFTId) public payable 
         whenNotPaused
-        isRegistered(msg.sender)
-        isNFTPublished(_NFTId)
-        hasNFTNotYetBeenAcquired(_NFTId)
+        addressRegistered(msg.sender)
+        NFTPublished(_NFTId)
+        NFTNotYetBeenAcquired(_NFTId)
         paidEnough(_NFTPrices[_NFTId])
     {
         _acquiredNFTs[_NFTId] = true;
@@ -140,9 +174,9 @@ contract NFTsForFriends is Ownable, Pausable{
         address[] memory _buyers
     ) public payable 
         whenNotPaused
-        isRegistered(msg.sender)
-        isNFTPublished(_NFTId)
-        hasNFTNotYetBeenAcquired(_NFTId)
+        addressRegistered(msg.sender)
+        NFTPublished(_NFTId)
+        NFTNotYetBeenAcquired(_NFTId)
         paidEnough(_NFTPrices[_NFTId])
     {
         // acquires the NFT as a shared property

@@ -28,14 +28,15 @@ contract NFF is ERC721, Pausable, Ownable {
     }
 
     /// @notice Safely mint an ERC721 token owned by "to".
+    /// @dev First Token id is superior to 0.
     /// @param to Owner of the minted token.
     /// @return Minted token id.
     function safeMint(address to) public 
         onlyOwner 
         returns (uint256)
     {
-        uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
+        uint256 tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
         return tokenId;
     }
