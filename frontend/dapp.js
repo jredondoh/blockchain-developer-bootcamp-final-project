@@ -1,5 +1,5 @@
 // contract address on blockchain:
-const scAddress = '0xa918d380b258865e5553ff9bfd27074C707Eda9f'
+const scAddress = '0x6fE8866acE74735466E14A89Fc76dD73f65590bE'
 
 const scAbi= [
   {
@@ -371,7 +371,7 @@ const scAbi= [
   }
 ]
 
-const NFT1hash = 1
+const NFT1hash = 11
 
 // Using the 'load' event listener for Javascript to
 // check if window.ethereum is available
@@ -382,23 +382,13 @@ window.addEventListener('load', function() {
     console.log('window.ethereum is enabled')
     if (window.ethereum.isMetaMask === true) {
       console.log('MetaMask is active')
-      let mmDetected = document.getElementById('mm-detected')
-      mmDetected.innerHTML += 'MetaMask Is Available!'
-
-      // add in web3 here
-      var web3 = new Web3(window.ethereum)
-
     } else {
-      console.log('MetaMask is not available')
-      let mmDetected = document.getElementById('mm-detected')
-      mmDetected.innerHTML += 'MetaMask Not Available!'
-      // let node = document.createTextNode('<p>MetaMask Not Available!<p>')
-      // mmDetected.appendChild(node)
+      console.log('window.ethereum.isMetaMask != true')
+      alert('MetaMask is not available')
     }
   } else {
     console.log('window.ethereum is not found')
-    let mmDetected = document.getElementById('mm-detected')
-    mmDetected.innerHTML += '<p>MetaMask Not Available!<p>'
+    alert('MetaMask is not available')
   }
 })
 
@@ -420,27 +410,6 @@ mmEnable.onclick = async () => {
   await ethereum.request({ method: 'eth_requestAccounts'})
 }
 
-// grab the button for input to a contract:
-
-/* const ssSubmit = document.getElementById('sc-register-in');
-
-ssSubmit.onclick = async () => {
-  // grab value from input
-  
-  const ssInputValue = document.getElementById('ss-input-box').value;
-  console.log(ssInputValue)
-
-  var web3 = new Web3(window.ethereum)
-
-  // instantiate smart contract instance
-  
-  const smartContract = new web3.eth.Contract(scAbi, scAddress)
-  smartContract.setProvider(window.ethereum)
-
-  await smartContract.methods.registerIn().send({from: ethereum.selectedAddress})
-
-}
- */
 const scRegisterIn = document.getElementById('sc-register-in')
 const bcStateRead = document.getElementById('bc-state-read')
 
@@ -477,7 +446,8 @@ bcStateRead.onclick = async () => {
 
   var nft1Id = await smartContract.methods.getNFTId(NFT1hash).call()
   var nft1Price = await smartContract.methods.getNFTPrice(NFT1hash).call()
-  var isNft1Mine = await smartContract.methods.amIOwnerOf(NFT1hash).call({from: ethereum.selectedAddress})
+  var isNft1Mine = await smartContract.methods.amIOwnerOf(nft1Id).call({from: ethereum.selectedAddress})
+  
   const nft1Info = document.getElementById('nft1-info')
   nft1Info.innerHTML = "<b>NFT1</b> Hash =" + NFT1hash + "<br>Price = " + nft1Price +"wei"
   if (isNft1Mine){
@@ -494,7 +464,7 @@ bcStateRead.onclick = async () => {
     nft1Acquire.disabled = true
     nft1AcquireShared.disabled = true
     nft1AcquireSharedInput.disabled = true
-  }
+   }
 
 }
 
@@ -508,6 +478,27 @@ nft1Acquire.onclick = async () => {
   var nft1Id = await smartContract.methods.getNFTId(NFT1hash).call()
   var nft1Price = await smartContract.methods.getNFTPrice(NFT1hash).call()
 
-  const tx = await smartContract.methods.acquireNFT(nft1Id).send({from: ethereum.selectedAddress, value: nft1Price})
-  console.log(tx)
+  await smartContract.methods.acquireNFT(nft1Id).send({from: ethereum.selectedAddress, value: nft1Price})
+}
+
+nft1AcquireShared.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft1Id = await smartContract.methods.getNFTId(NFT1hash).call()
+  var nft1Price = await smartContract.methods.getNFTPrice(NFT1hash).call()
+
+  const friendToShare = nft1AcquireSharedInput.value;
+  if (friendToShare == ""){
+    alert("Please, provide friend's address to acquired shared NFT.")
+  } else{
+    let propertyPoints = [1, 1]
+    let nftSharedOwners = [ethereum.selectedAddress, friendToShare]
+  
+    await smartContract.methods.acquireSharedNFT(nft1Id, propertyPoints, nftSharedOwners).send({from: ethereum.selectedAddress, value: nft1Price})
+  }
+  nft1AcquireSharedInput.value = ""
 }
