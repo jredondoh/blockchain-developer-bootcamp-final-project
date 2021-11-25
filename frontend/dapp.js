@@ -583,3 +583,108 @@ nft1AcquireShared.onclick = async () => {
   }
   nft1AcquireSharedInput.value = ""
 }
+
+nft2Acquire.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft2Id = await smartContract.methods.getNFTId(NFT2hash).call()
+  var nft2Price = await smartContract.methods.getNFTPrice(NFT2hash).call()
+
+  await smartContract.methods.acquireNFT(nft2Id).send({ from: ethereum.selectedAddress, value: nft2Price })
+}
+
+nft2AcquireShared.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft2Id = await smartContract.methods.getNFTId(NFT2hash).call()
+  var nft2Price = await smartContract.methods.getNFTPrice(NFT2hash).call()
+
+  const friendToShare = nft2AcquireSharedInput.value;
+  if (friendToShare == "") {
+    alert("Please, provide friend's address to acquired shared NFT.")
+  } else {
+    let propertyPoints = [1, 1]
+    let nftSharedOwners = [ethereum.selectedAddress, friendToShare]
+
+    await smartContract.methods.acquireSharedNFT(nft2Id, propertyPoints, nftSharedOwners).send({ from: ethereum.selectedAddress, value: nft2Price })
+  }
+  nft2AcquireSharedInput.value = ""
+}
+
+nft3Acquire.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft3Id = await smartContract.methods.getNFTId(NFT3hash).call()
+  var nft3Price = await smartContract.methods.getNFTPrice(NFT3hash).call()
+
+  await smartContract.methods.acquireNFT(nft3Id).send({ from: ethereum.selectedAddress, value: nft3Price })
+}
+
+nft3AcquireShared.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft3Id = await smartContract.methods.getNFTId(NFT3hash).call()
+  var nft3Price = await smartContract.methods.getNFTPrice(NFT3hash).call()
+
+  const friendToShare = nft3AcquireSharedInput.value;
+  if (friendToShare == "") {
+    alert("Please, provide friend's address to acquired shared NFT.")
+  } else {
+    let propertyPoints = [1, 1]
+    let nftSharedOwners = [ethereum.selectedAddress, friendToShare]
+
+    await smartContract.methods.acquireSharedNFT(nft3Id, propertyPoints, nftSharedOwners).send({ from: ethereum.selectedAddress, value: nft3Price })
+  }
+  nft3AcquireSharedInput.value = ""
+}
+
+nft4Acquire.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft4Id = await smartContract.methods.getNFTId(NFT4hash).call()
+  var nft4Price = await smartContract.methods.getNFTPrice(NFT4hash).call()
+
+  await smartContract.methods.acquireNFT(nft4Id).send({ from: ethereum.selectedAddress, value: nft4Price })
+}
+
+nft4AcquireShared.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft4Id = await smartContract.methods.getNFTId(NFT4hash).call()
+  var nft4Price = await smartContract.methods.getNFTPrice(NFT4hash).call()
+
+  const friendToShare = nft4AcquireSharedInput.value;
+  if (friendToShare == "") {
+    alert("Please, provide friend's address to acquired shared NFT.")
+  } else {
+    let propertyPoints = [1, 1]
+    let nftSharedOwners = [ethereum.selectedAddress, friendToShare]
+
+    await smartContract.methods.acquireSharedNFT(nft4Id, propertyPoints, nftSharedOwners).send({ from: ethereum.selectedAddress, value: nft4Price })
+  }
+  nft4AcquireSharedInput.value = ""
+}
