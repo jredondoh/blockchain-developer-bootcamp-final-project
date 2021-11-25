@@ -1,5 +1,5 @@
 // contract address on blockchain:
-const scAddress = '0xc64ffb1fD0ffbA4575Eb975826F05D40D841373C'
+const scAddress = '0xa918d380b258865e5553ff9bfd27074C707Eda9f'
 
 const scAbi= [
   {
@@ -442,9 +442,21 @@ ssSubmit.onclick = async () => {
 }
  */
 const scRegisterIn = document.getElementById('sc-register-in')
-const nft1Acquire = document.getElementById('nft1-acquire')
-
 const bcStateRead = document.getElementById('bc-state-read')
+
+scRegisterIn.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  await smartContract.methods.registerIn().send({from: ethereum.selectedAddress})
+}
+
+const nft1Acquire = document.getElementById('nft1-acquire')
+const nft1AcquireShared = document.getElementById('nft1-acquire-shared')
+const nft1AcquireSharedInput = document.getElementById('nft1-acquire-shared-input')
 
 bcStateRead.onclick = async () => {
 
@@ -453,25 +465,49 @@ bcStateRead.onclick = async () => {
   const smartContract = new web3.eth.Contract(scAbi, scAddress)
   smartContract.setProvider(window.ethereum)
 
-  var value = await smartContract.methods.isAddressRegistered(ethereum.selectedAddress).call()
+  var registered = await smartContract.methods.isAddressRegistered(ethereum.selectedAddress).call()
 
-  if (value){
+  if (registered){
+    scRegisterIn.innerHTML  = "REGISTERED"
     scRegisterIn.disabled = true
   } else{
+    scRegisterIn.innerHTML  = "Register in Dapp"
     scRegisterIn.disabled = false
   }
 
   var nft1Id = await smartContract.methods.getNFTId(NFT1hash).call()
   var nft1Price = await smartContract.methods.getNFTPrice(NFT1hash).call()
+  var isNft1Mine = await smartContract.methods.amIOwnerOf(NFT1hash).call({from: ethereum.selectedAddress})
   const nft1Info = document.getElementById('nft1-info')
-  nft1Info.innerHTML= "NFT Hash:" + NFT1hash + "and price: " + nft1Price +"wei"
+  nft1Info.innerHTML = "<b>NFT1</b> Hash =" + NFT1hash + "<br>Price = " + nft1Price +"wei"
+  if (isNft1Mine){
+    nft1Info.innerHTML = nft1Info.innerHTML + "<br><b>IS YOURS!!</b> Congratulations!!!"
 
-  var nft1Available = await smartContract.methods.isNFTAvailable(nft1Id).call()
-
-  if (nft1Available){
-    nft1Acquire.disabled = false
-  } else{
-    nft1Acquire.disabled = true
   }
 
+  var nft1Available = await smartContract.methods.isNFTAvailable(nft1Id).call()
+  if (nft1Available){
+    nft1Acquire.disabled = false
+    nft1AcquireShared.disabled = false
+    nft1AcquireSharedInput.disabled = false
+  } else{
+    nft1Acquire.disabled = true
+    nft1AcquireShared.disabled = true
+    nft1AcquireSharedInput.disabled = true
+  }
+
+}
+
+nft1Acquire.onclick = async () => {
+  var web3 = new Web3(window.ethereum)
+
+  // instantiate smart contract instance
+  const smartContract = new web3.eth.Contract(scAbi, scAddress)
+  smartContract.setProvider(window.ethereum)
+
+  var nft1Id = await smartContract.methods.getNFTId(NFT1hash).call()
+  var nft1Price = await smartContract.methods.getNFTPrice(NFT1hash).call()
+
+  const tx = await smartContract.methods.acquireNFT(nft1Id).send({from: ethereum.selectedAddress, value: nft1Price})
+  console.log(tx)
 }
