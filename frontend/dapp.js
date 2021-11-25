@@ -1,5 +1,5 @@
 // contract address on blockchain:
-const scAddress = '0x6fE8866acE74735466E14A89Fc76dD73f65590bE'
+const scAddress = '0x4E3bB98424D42A400dBD8a2A7300766501c2752d'
 
 const scAbi = [
   {

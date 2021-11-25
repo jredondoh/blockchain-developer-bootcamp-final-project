@@ -7,5 +7,5 @@ module.exports = async (deployer) => {
   await deployer.deploy(NFTsForFriends, instanceNFF.address);
   const instanceNFTsForFriends = await NFTsForFriends.deployed();
   await instanceNFF.setApprovalForAll(instanceNFTsForFriends.address, true);
-  await instanceNFF.transferOwnership(NFTsForFriends.address);
+  await instanceNFF.transferOwnership(instanceNFTsForFriends.address);
 };
