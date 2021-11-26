@@ -1,7 +1,7 @@
 var NFTsForFriends = artifacts.require(".build/contracts/NFTsForFriends");
 
 module.exports = async function(callback) {
-  const owner = "0x76c9143276Db0aE539c115dc43f02D760A168C49"
+  const owner = "0xa555b99039CF935b8ea5D7c1872d1956B8E04D86"
   const nft1hash = 11
   const nft1Price = 101000000
   const nft2hash = 22
@@ -10,7 +10,7 @@ module.exports = async function(callback) {
   const nft3Price = 103000000
   const nft4hash = 44
   const nft4Price = 104000000
-  const instance = await NFTsForFriends.at("0x6fE8866acE74735466E14A89Fc76dD73f65590bE")
+  const instance = await NFTsForFriends.at("0x6e28AC3b67a4aE5A38d643B1323465091cbF2f84")
   console.log(instance.address)
 
   await instance.publishNFT(nft1hash,nft1Price, {from: owner});

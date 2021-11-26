@@ -1,5 +1,9 @@
 # NFTs shared with friends
 
+## Frontend address
+
+https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
+
 ## Initial description and goals
 
 ### Description:
@@ -28,9 +32,18 @@ At root folder:
 - test, with the smart-contract unit tests and helper files
 - docs, that contains the frontend app
 
+## Prerequisites
+
+- npm
+- truffle
+- ganache-cli
+- Live Server feature (I used VSCode one)
+
 ## Installation steps
 
-You need to install open-zeppelin contracts, that smart-contracts inherits from.
+Perform all actions from the project root folder.
+
+You need to install open-zeppelin contracts, as my smart-contracts inherits from them.
 
 ```bash
 npm install @openzeppelin/contracts
@@ -49,28 +62,34 @@ You do not need local testnet for these unit tests.
 
 ### Local E2E tests
 
+Perform all actions from the project root folder.
+
 You can test locally the complete Dapp.
 
-First, start with the contracts migration using:
+First, deploy a local testnet on default port 8545:
+```bash
+ganache-cli
+```
+
+Truffle `local` network configuration included in the project connects to this local testnet.
+
+So start with the contracts migration using:
 ```bash
 truffle migrate --network local
 ```
+
+Copy the address of the deployed `NFTsForFriends` contract in the setup script (`setup/setup_dapp.js`).
 
 Then you perform the setup actions (publishing the needed NFTs) with:
 ```bash
 truffle exec setup/setup_dapp.js --network local
 ```
 
-Then you set a Live Server for `docs/index.html`. You need Live Server as Metamask connects only to a server, not an static file (took me long time!).
+Modify the address of the deployed `NFTsForFriends` contract in `docs/dapp.js`.
 
-## Frontend address
+Finally you set a Live Server for `docs/index.html`. You need Live Server as Metamask connects only to a server, not an static file (took me long time!).
 
-https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
-
-##
-
-All in Goerli testnet:
-- NFF at 0x645652b1C4544c86436b6760d74121540E0A0A98
-- NFTsForFriends at 0x4E3bB98424D42A400dBD8a2A7300766501c2752d
-
-
+And access to the frontend. For example, as I was running the live server at port 5500, I accessed to:
+```
+http://127.0.0.1:5500/docs/
+```
