@@ -151,10 +151,34 @@ contract("NFTsForFriends", function (accounts) {
       );
 
     });
-    it("should allow someone to acquire a published NFT for them and their friends, and its owner must be coherent", async () => {
+
+    it("should not allow someone to register in a paused contract", async () => {
       await instance.pause({ from: _owner})
-      const tx = await instance.registerIn({ from: alice });
-      console.log(tx);
+      const PREFIX = "Returned error: VM Exception while processing transaction:";
+      const expectedMsg =" revert Pausable: paused";
+      try{
+        await instance.registerIn({ from: alice });
+      } catch (e) {
+        assert(e.message.startsWith(PREFIX + expectedMsg),"expected an error");
+      }
+      await instance.unpause({ from: _owner})
+      await instance.registerIn({ from: alice });
+    });
+    
+    it("should not allow someone to acquire a NFT in a paused contract", async () => {
+      const NFTId = 1
+      await instance.publishNFT(NFTHash, price, { from: _owner });
+      await instance.registerIn({ from: alice });
+
+      await instance.pause({ from: _owner})
+
+      const PREFIX = "Returned error: VM Exception while processing transaction:";
+      const expectedMsg =" revert Pausable: paused";
+      try{
+        await instance.acquireNFT(NFTId, { from: alice, value: excessAmount })
+      } catch (e) {
+        assert(e.message.startsWith(PREFIX + expectedMsg),"expected an error");
+      }
     });
   });
 });

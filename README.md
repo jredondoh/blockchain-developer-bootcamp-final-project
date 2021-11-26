@@ -26,7 +26,7 @@ At root folder:
 - contracts, that contains the developed smart-contracts
 - migrations, that contains the migration files
 - test, with the smart-contract unit tests and helper files
-- XXXXXXxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx frontend xxxxxxxxxxxxxxxxx
+- docs, that contains the frontend app
 
 ## Installation steps
 
@@ -47,9 +47,25 @@ truffle test
 ```
 You do not need local testnet for these unit tests.
 
+### Local E2E tests
+
+You can test locally the complete Dapp.
+
+First, start with the contracts migration using:
+```bash
+truffle migrate --network local
+```
+
+Then you perform the setup actions (publishing the needed NFTs) with:
+```bash
+truffle exec setup/setup_dapp.js --network local
+```
+
+Then you set a Live Server for `docs/index.html`. You need Live Server as Metamask connects only to a server, not an static file (took me long time!).
+
 ## Frontend address
 
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
 
 ##
 
