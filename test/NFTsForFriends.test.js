@@ -152,6 +152,16 @@ contract("NFTsForFriends", function (accounts) {
 
     });
 
+    it("should only allow the owner to pause the contract", async () => {
+      const PREFIX = "Returned error: VM Exception while processing transaction:";
+      const expectedMsg =" revert Ownable: caller is not the owner";
+      try{
+        await instance.pause({ from: alice})
+      } catch (e) {
+        assert(e.message.startsWith(PREFIX + expectedMsg),"expected an error");
+      }
+    });
+
     it("should not allow someone to register in a paused contract", async () => {
       await instance.pause({ from: _owner})
       const PREFIX = "Returned error: VM Exception while processing transaction:";
@@ -164,7 +174,7 @@ contract("NFTsForFriends", function (accounts) {
       await instance.unpause({ from: _owner})
       await instance.registerIn({ from: alice });
     });
-    
+
     it("should not allow someone to acquire a NFT in a paused contract", async () => {
       const NFTId = 1
       await instance.publishNFT(NFTHash, price, { from: _owner });

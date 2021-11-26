@@ -1,7 +1,12 @@
 # NFTs shared with friends
 
-## Frontend address
+## Frontend URL
 
+https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
+
+## Screencast recording
+
+XXXXX
 https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
 
 ## Initial description and goals
@@ -28,12 +33,17 @@ The different property percentage can be sold/transferred or split even more.
 
 At root folder:
 - contracts, that contains the developed smart-contracts
-- migrations, that contains the migration files
-- test, with the smart-contract unit tests and helper files
 - docs, that contains the frontend app
+- migrations, that contains the migration files
+- setup, with the setup script to test E2E locally
+- test, with the smart-contract unit tests and helper files
 
 ## Prerequisites
 
+For frontend use:
+- Metamask
+
+For installation and local E2E tests:
 - npm
 - truffle
 - ganache-cli
@@ -78,7 +88,7 @@ So start with the contracts migration using:
 truffle migrate --network local
 ```
 
-Copy the address of the deployed `NFTsForFriends` contract in the setup script (`setup/setup_dapp.js`).
+Copy the address of the deployed `NFTsForFriends` contract in the setup script (`setup/setup_dapp.js`). Also set the contract owner address in the same setup script.
 
 Then you perform the setup actions (publishing the needed NFTs) with:
 ```bash
@@ -89,7 +99,7 @@ Modify the address of the deployed `NFTsForFriends` contract in `docs/dapp.js`.
 
 Finally you set a Live Server for `docs/index.html`. You need Live Server as Metamask connects only to a server, not an static file (took me long time!).
 
-And access to the frontend. For example, as I was running the live server at port 5500, I accessed to:
+And you access to the frontend. For example, as I was running the live server at port 5500, I accessed to:
 ```
 http://127.0.0.1:5500/docs/
 ```
