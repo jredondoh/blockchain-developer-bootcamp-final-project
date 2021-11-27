@@ -6,8 +6,7 @@ https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
 
 ## Screencast recording
 
-XXXXX
-https://jredondoh.github.io/blockchain-developer-bootcamp-final-project/
+https://www.loom.com/share/62893a6432f04375857f95242261b97e
 
 ## Initial description and goals
 
